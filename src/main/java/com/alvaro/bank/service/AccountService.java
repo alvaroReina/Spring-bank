@@ -6,6 +6,7 @@ import com.alvaro.bank.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -20,12 +21,12 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
-    public Account getAccount(Long id) {
+    public Account getAccount(UUID id) {
         return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
     }
 
     public Account createAccount(Account newAccount) {
-        newAccount.setId(-1);
+        newAccount.setId(null);
         return accountRepository.save(newAccount);
     }
 

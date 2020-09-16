@@ -1,13 +1,17 @@
 package com.alvaro.bank.controller;
 
+import com.alvaro.bank.dto.AccountDTO;
 import com.alvaro.bank.exception.AccountNotFoundException;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.service.AccountService;
+import com.alvaro.bank.util.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -21,8 +25,11 @@ public class AccountController {
     }
 
     @GetMapping("/accounts")
-    public List<Account> getAllAccounts() {
-        return accountService.getAllAccounts();
+    public List<AccountDTO> getAllAccounts() {
+        return accountService.getAllAccounts()
+                .stream()
+                .map(AccountUtils::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/accounts")
@@ -31,8 +38,9 @@ public class AccountController {
     }
 
     @GetMapping("/accounts/{id}")
-    public Account findAccount(@PathVariable Long id) {
-        return accountService.getAccount(id);
+    public AccountDTO findAccount(@PathVariable UUID id) {
+        Account account = accountService.getAccount(id);
+        return AccountUtils.convertToDTO(account);
     }
 
     @ExceptionHandler(AccountNotFoundException.class)
