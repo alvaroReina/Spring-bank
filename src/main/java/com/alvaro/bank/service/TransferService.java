@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.UUID;
 
 import static com.alvaro.bank.util.Utils.getNormalizedAccountBalance;
 
@@ -27,42 +26,43 @@ public class TransferService {
     /**
      * Performs a transference, calculates the new balance for the sender and receiver
      * and commits the result to the database.
-     *
+     * <p>
      * The balance manipulation is done using USD as a reference, the result is converted to the account currency.
+     *
      * @param transfer a {@link Transfer}
      */
     public void doTransfer(Transfer transfer) {
-        UUID from = transfer.getSender();
-        UUID to = transfer.getReceiver();
-        if (from.equals(to)) {
+        String sender = transfer.getSender();
+        String receiver = transfer.getReceiver();
+        if (sender.equals(receiver)) {
             throw new TransferException("The sender and receiver account cannot be the same");
         }
 
         //Check if both accounts exists
-        Account fromAcc = accountRepository.findById(from).orElseThrow(() -> new AccountNotFoundException(from));
-        Account toAcc = accountRepository.findById(to).orElseThrow(() -> new AccountNotFoundException(to));
+        Account senderAcc = accountRepository.findAccountByName(sender)
+                .orElseThrow(() -> new AccountNotFoundException(sender));
+        Account receiverAcc = accountRepository.findAccountByName(receiver)
+                .orElseThrow(() -> new AccountNotFoundException(receiver));
 
         //Get the sender balance in USD
         BigDecimal normalizedAmount = transfer.getAmount().multiply(transfer.getCurrency().getRate());
-        BigDecimal normalizedSenderBalance = getNormalizedAccountBalance(fromAcc);
+        BigDecimal normalizedSenderBalance = getNormalizedAccountBalance(senderAcc);
+
+        //Calculate the new balance for the sender account and convert it to the sender currency.
+        BigDecimal senderNewBalance = normalizedSenderBalance.subtract(normalizedAmount);
+        senderAcc.setBalance(senderNewBalance.multiply(senderAcc.getCurrency().getInverseRate()));
 
         //Only a treasury account can have a negative balance
-        if (normalizedSenderBalance.subtract(normalizedAmount).compareTo(BigDecimal.ZERO) < 0 &&
-                !fromAcc.getTreasury()
-        ) {
+        if (!senderAcc.isBalanceValid()) {
             throw new TransferException(transfer.getAmount(), transfer.getCurrency());
         }
 
-        //Calculates the new balance for the sender account and convert it to the sender currency.
-        BigDecimal senderNewBalance = normalizedSenderBalance.subtract(normalizedAmount);
-        fromAcc.setBalance(senderNewBalance.multiply(fromAcc.getCurrency().getInverseRate()));
-
-        //Same to the receiver account.
-        BigDecimal normalizedReceiverBalance = getNormalizedAccountBalance(toAcc);
+        //Calculate new balance for the receiver account
+        BigDecimal normalizedReceiverBalance = getNormalizedAccountBalance(receiverAcc);
         BigDecimal receiverNewBalance = normalizedReceiverBalance.add(normalizedAmount);
-        toAcc.setBalance(receiverNewBalance.multiply(toAcc.getCurrency().getInverseRate()));
+        receiverAcc.setBalance(receiverNewBalance.multiply(receiverAcc.getCurrency().getInverseRate()));
 
-        accountRepository.saveAll(Arrays.asList(fromAcc, toAcc));
+        accountRepository.saveAll(Arrays.asList(senderAcc, receiverAcc));
         //Explicitly order JPA to commit the changes to the database
         accountRepository.flush();
     }

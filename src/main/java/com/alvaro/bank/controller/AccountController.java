@@ -3,14 +3,12 @@ package com.alvaro.bank.controller;
 import com.alvaro.bank.dto.AccountDTO;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.service.AccountService;
-import com.alvaro.bank.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -25,20 +23,17 @@ public class AccountController {
 
     @GetMapping(value = "/accounts", produces = "application/json")
     public List<AccountDTO> getAllAccounts() {
-        return accountService.getAllAccounts()
-                .stream()
-                .map(Utils::convertToDTO)
-                .collect(Collectors.toList());
+        return accountService.getAllAccounts();
+    }
+
+    @GetMapping(value = "/accounts/search", produces = "application/json")
+    public AccountDTO searchAccounts(@RequestParam(value = "name") String name) {
+        return accountService.findAccountByName(name);
     }
 
     @PostMapping(value = "/accounts", produces = "application/json", consumes = "application/json")
-    public Account newAccount(@RequestBody @Valid Account newAccount) {
-        return accountService.createAccount(newAccount);
-    }
-
-    @GetMapping(value = "/accounts/{id}", produces = "application/json")
-    public AccountDTO findAccount(@PathVariable UUID id) {
-        Account account = accountService.getAccount(id);
-        return Utils.convertToDTO(account);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void newAccount(@RequestBody @Valid Account newAccount) {
+        accountService.createAccount(newAccount);
     }
 }

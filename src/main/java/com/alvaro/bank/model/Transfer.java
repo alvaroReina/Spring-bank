@@ -5,14 +5,13 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 public class Transfer {
     @NotNull
-    private UUID sender;
+    private String sender;
     @NotNull
-    private UUID receiver;
+    private String receiver;
     @NotNull
     @Positive
     private BigDecimal amount;

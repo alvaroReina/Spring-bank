@@ -1,14 +1,15 @@
 package com.alvaro.bank.service;
 
+import com.alvaro.bank.dto.AccountDTO;
 import com.alvaro.bank.exception.AccountNotFoundException;
-import com.alvaro.bank.exception.NegativeBalanceException;
+import com.alvaro.bank.exception.AccountCreationException;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.repository.AccountRepository;
+import com.alvaro.bank.util.Utils;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountService {
@@ -19,21 +20,28 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public List<Account> getAllAccounts() {
-        return accountRepository.findAll();
+    public List<AccountDTO> getAllAccounts() {
+        return accountRepository.findAll()
+                .stream()
+                .map(Utils::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Account getAccount(UUID id) {
-        return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException(id));
+    public AccountDTO findAccountByName(String name) {
+        return accountRepository.findAccountByName(name).map(Utils::convertToDTO).orElseThrow(() -> new AccountNotFoundException(name));
     }
 
-    public Account createAccount(Account newAccount) {
+    public void createAccount(Account newAccount) {
         newAccount.setId(null);
-        if (newAccount.getBalance().compareTo(BigDecimal.ZERO) >= 0 || newAccount.getTreasury()) {
-            return accountRepository.save(newAccount);
+        if (newAccount.isBalanceValid()) {
+            if (accountRepository.existsAccountByName(newAccount.getName())) {
+                throw new AccountCreationException("Name is already in use: " + newAccount.getName());
+            }
+            accountRepository.saveAndFlush(newAccount);
         } else {
-            throw new NegativeBalanceException(newAccount.getBalance());
+            throw new AccountCreationException(newAccount.getBalance());
         }
     }
+
 
 }
