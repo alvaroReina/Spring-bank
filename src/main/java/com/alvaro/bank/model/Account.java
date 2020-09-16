@@ -1,6 +1,8 @@
 package com.alvaro.bank.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -16,6 +18,8 @@ import java.math.BigDecimal;
  * were considered and they doesn't provide an actual improvement for this use case.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Account {
 
@@ -42,7 +46,7 @@ public class Account {
     /**
      * Checks if the balance is valid for the given account type.
      */
-    public boolean isBalanceValid() {
+    public boolean checkBalance() {
         return this.getBalance().compareTo(BigDecimal.ZERO) >= 0 || this.getTreasury();
     }
 }

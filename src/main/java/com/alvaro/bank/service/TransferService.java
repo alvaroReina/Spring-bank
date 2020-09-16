@@ -53,7 +53,7 @@ public class TransferService {
         senderAcc.setBalance(senderNewBalance.multiply(senderAcc.getCurrency().getInverseRate()));
 
         //Only a treasury account can have a negative balance
-        if (!senderAcc.isBalanceValid()) {
+        if (!senderAcc.checkBalance()) {
             throw new TransferException(transfer.getAmount(), transfer.getCurrency());
         }
 

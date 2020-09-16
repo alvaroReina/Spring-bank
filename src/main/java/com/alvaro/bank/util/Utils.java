@@ -14,12 +14,12 @@ public class Utils {
      * @return a DTO
      */
     public static AccountDTO convertToDTO(Account account) {
-        AccountDTO accountDTO = new AccountDTO();
-        accountDTO.setName(account.getName());
-        accountDTO.setCurrency(account.getCurrency().name());
-        accountDTO.setBalance(account.getBalance());
-        accountDTO.setTreasury(account.getTreasury());
-        return accountDTO;
+        return new AccountDTO(
+                account.getName(),
+                account.getCurrency().name(),
+                account.getBalance(),
+                account.getTreasury()
+        );
     }
 
     /**
