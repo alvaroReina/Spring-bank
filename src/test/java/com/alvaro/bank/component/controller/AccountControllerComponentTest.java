@@ -1,4 +1,4 @@
-package com.alvaro.bank.unit.controller;
+package com.alvaro.bank.component.controller;
 
 import com.alvaro.bank.controller.AccountController;
 import com.alvaro.bank.dto.AccountDTO;
@@ -20,14 +20,15 @@ import java.util.List;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Tests input validation and service calls.
  */
 @WebMvcTest(AccountController.class)
-public class AccountControllerTest {
+public class AccountControllerComponentTest {
 
     @Autowired
     private MockMvc mockMvc;

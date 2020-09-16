@@ -1,4 +1,4 @@
-package com.alvaro.bank.unit.controller;
+package com.alvaro.bank.component.controller;
 
 import com.alvaro.bank.controller.TransferController;
 import com.alvaro.bank.model.Currency;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests input validation and service calls.
  */
 @WebMvcTest(TransferController.class)
-public class TransferControllerTest {
+public class TransferControllerComponentTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,7 +46,6 @@ public class TransferControllerTest {
         verify(service, times(1)).doTransfer(any());
     }
 
-    //Same account transfer is tested on TransferService
     @Test
     public void shouldReturn404_onZeroAmountTransfer() throws Exception {
         Transfer transfer = new Transfer("User1", "User2", BigDecimal.ZERO, Currency.USD);
