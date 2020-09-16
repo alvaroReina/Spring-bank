@@ -3,7 +3,7 @@ package com.alvaro.bank.controller;
 import com.alvaro.bank.dto.AccountDTO;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.service.AccountService;
-import com.alvaro.bank.util.AccountUtils;
+import com.alvaro.bank.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +27,7 @@ public class AccountController {
     public List<AccountDTO> getAllAccounts() {
         return accountService.getAllAccounts()
                 .stream()
-                .map(AccountUtils::convertToDTO)
+                .map(Utils::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -39,6 +39,6 @@ public class AccountController {
     @GetMapping(value = "/accounts/{id}", produces = "application/json")
     public AccountDTO findAccount(@PathVariable UUID id) {
         Account account = accountService.getAccount(id);
-        return AccountUtils.convertToDTO(account);
+        return Utils.convertToDTO(account);
     }
 }
