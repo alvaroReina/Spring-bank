@@ -27,7 +27,7 @@ public class TransferService {
      * Performs a transference, calculates the new balance for the sender and receiver
      * and commits the result to the database.
      * <p>
-     * The balance manipulation is done using USD as a reference, the result is converted to the account currency.
+     * The balance manipulation is done using USD as the reference currency, the result is converted to the account currency.
      *
      * @param transfer a {@link Transfer}
      */
