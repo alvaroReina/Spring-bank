@@ -5,7 +5,7 @@ This Spring Application provides a REST API that allows the user to create accou
 ## Instalation
 
 ## Prerequisites
-- [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
+- [Java 8](https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=hotspot).
 - [Maven](https://maven.apache.org/install.html)
 
 ## Build
@@ -43,7 +43,7 @@ Since the requirements do not mention deposit and withdrawals, the account balan
 
 The system only supports EUR, USD and GBP currencies with a fixed exchange rate. Transfers are calculated using USD as the standard currency.  
 
-The amount of money is stored as a BigDecimal to avoid losing decimal precision.
+The amount of money is stored as a BigDecimal to avoid losing decimal precision. To handle currencies I included a simple Currency class.
 
 ## Persistence
 
