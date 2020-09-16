@@ -1,10 +1,12 @@
 package com.alvaro.bank.service;
 
 import com.alvaro.bank.exception.AccountNotFoundException;
+import com.alvaro.bank.exception.BalanceException;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +29,11 @@ public class AccountService {
 
     public Account createAccount(Account newAccount) {
         newAccount.setId(null);
-        return accountRepository.save(newAccount);
+        if (newAccount.getBalance().compareTo(BigDecimal.ZERO) >= 0 || newAccount.getTreasury()) {
+            return accountRepository.save(newAccount);
+        } else {
+            throw new BalanceException("Only treasury accounts balance can be negative");
+        }
     }
 
 }
