@@ -1,8 +1,10 @@
 package com.alvaro.bank.controller;
 
+import com.alvaro.bank.exception.AccountNotFoundException;
 import com.alvaro.bank.model.Account;
-import com.alvaro.bank.repository.AccountRepository;
+import com.alvaro.bank.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,20 +13,31 @@ import java.util.List;
 @RequestMapping("/api")
 public class AccountController {
 
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
     @Autowired
-    public AccountController(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @GetMapping("/accounts")
     public List<Account> getAllAccounts() {
-        return accountRepository.findAll();
+        return accountService.getAllAccounts();
     }
 
     @PostMapping("/accounts")
     public Account newAccount(@RequestBody Account newAccount) {
-        return accountRepository.save(newAccount);
+        return accountService.createAccount(newAccount);
+    }
+
+    @GetMapping("/accounts/{id}")
+    public Account findAccount(@PathVariable Long id) {
+        return accountService.getAccount(id);
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String accountNotFoundHandler(AccountNotFoundException ex) {
+        return ex.getMessage();
     }
 }

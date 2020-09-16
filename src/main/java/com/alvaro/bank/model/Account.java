@@ -2,6 +2,7 @@ package com.alvaro.bank.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -17,5 +18,6 @@ public class Account {
     private String name;
     private String currency;
     private BigDecimal balance;
+    @Column(updatable = false)
     private Boolean treasury;
 }
