@@ -34,7 +34,7 @@ public class AccountService {
     public void createAccount(Account newAccount) {
         //Invalidate any id to force a new insertion.
         newAccount.setId(null);
-        if (newAccount.checkBalance()) {
+        if (newAccount.isValidBalance()) {
             if (accountRepository.existsAccountByName(newAccount.getName())) {
                 throw new AccountCreationException("Name is already in use: " + newAccount.getName());
             }

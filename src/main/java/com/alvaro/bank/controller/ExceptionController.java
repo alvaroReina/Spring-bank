@@ -3,6 +3,7 @@ package com.alvaro.bank.controller;
 import com.alvaro.bank.dto.ApiErrorDTO;
 import com.alvaro.bank.exception.AccountNotFoundException;
 import com.alvaro.bank.exception.AccountCreationException;
+import com.alvaro.bank.exception.BalanceException;
 import com.alvaro.bank.exception.TransferException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,13 @@ public class ExceptionController {
 
     @ExceptionHandler(AccountCreationException.class)
     public ResponseEntity<ApiErrorDTO> invalidBalanceHandler(AccountCreationException ex) {
+        HttpStatus responseStatus = HttpStatus.BAD_REQUEST;
+        ApiErrorDTO apiError = new ApiErrorDTO(responseStatus.value(), ex.getMessage());
+        return new ResponseEntity<>(apiError, null, responseStatus);
+    }
+
+    @ExceptionHandler(BalanceException.class)
+    public ResponseEntity<ApiErrorDTO> balanceExceptionHandler(BalanceException ex) {
         HttpStatus responseStatus = HttpStatus.BAD_REQUEST;
         ApiErrorDTO apiError = new ApiErrorDTO(responseStatus.value(), ex.getMessage());
         return new ResponseEntity<>(apiError, null, responseStatus);

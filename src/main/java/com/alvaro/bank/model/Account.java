@@ -1,5 +1,7 @@
 package com.alvaro.bank.model;
 
+import com.alvaro.bank.exception.BalanceException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,10 +45,37 @@ public class Account {
     @NotNull
     private Boolean treasury = false;
 
+    @JsonIgnore
+    public boolean isValidBalance() {
+        return this.balance.compareTo(BigDecimal.ZERO) >= 0 || this.treasury;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        if (balance.compareTo(BigDecimal.ZERO) < 0 && !this.treasury) {
+            throw new BalanceException(this.name);
+        }
+        this.balance = balance;
+    }
+
+    public void addBalance(BigDecimal amount, Currency currency) {
+        BigDecimal newAmount = getNormalizedBalance().add(normalizeAmount(amount, currency));
+        setBalance(newAmount.multiply(this.currency.getInverseRate()));
+    }
+
+    public void subtractBalance(BigDecimal amount, Currency currency) {
+        BigDecimal newAmount = getNormalizedBalance().subtract(normalizeAmount(amount, currency));
+        setBalance(newAmount.multiply(this.currency.getInverseRate()));
+    }
+
     /**
-     * Checks if the balance is valid for the given account type.
+     * Converts the balance of an account in any {@link Currency} to its value in USD
+     *
      */
-    public boolean checkBalance() {
-        return this.getBalance().compareTo(BigDecimal.ZERO) >= 0 || this.getTreasury();
+    private BigDecimal getNormalizedBalance() {
+        return normalizeAmount(balance, currency);
+    }
+
+    private BigDecimal normalizeAmount(BigDecimal amount, Currency currency) {
+        return amount.multiply(currency.getRate());
     }
 }

@@ -1,6 +1,7 @@
 package com.alvaro.bank.service;
 
 import com.alvaro.bank.exception.AccountNotFoundException;
+import com.alvaro.bank.exception.BalanceException;
 import com.alvaro.bank.exception.TransferException;
 import com.alvaro.bank.model.Account;
 import com.alvaro.bank.model.Transfer;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import static com.alvaro.bank.util.Utils.getNormalizedAccountBalance;
 
 @Service
 public class TransferService {
@@ -44,24 +44,12 @@ public class TransferService {
         Account receiverAcc = accountRepository.findAccountByName(receiver)
                 .orElseThrow(() -> new AccountNotFoundException(receiver));
 
-        //Get the sender balance in USD
-        BigDecimal normalizedAmount = transfer.getAmount().multiply(transfer.getCurrency().getRate());
-        BigDecimal normalizedSenderBalance = getNormalizedAccountBalance(senderAcc);
-
-        //Calculate the new balance for the sender account and convert it to the sender currency.
-        BigDecimal senderNewBalance = normalizedSenderBalance.subtract(normalizedAmount);
-        senderAcc.setBalance(senderNewBalance.multiply(senderAcc.getCurrency().getInverseRate()));
-
-        //Only a treasury account can have a negative balance
-        if (!senderAcc.checkBalance()) {
+        try {
+            senderAcc.subtractBalance(transfer.getAmount(), transfer.getCurrency());
+            receiverAcc.addBalance(transfer.getAmount(), transfer.getCurrency());
+        } catch (BalanceException ex) {
             throw new TransferException(transfer.getAmount(), transfer.getCurrency());
         }
-
-        //Calculate new balance for the receiver account
-        BigDecimal normalizedReceiverBalance = getNormalizedAccountBalance(receiverAcc);
-        BigDecimal receiverNewBalance = normalizedReceiverBalance.add(normalizedAmount);
-        receiverAcc.setBalance(receiverNewBalance.multiply(receiverAcc.getCurrency().getInverseRate()));
-
         accountRepository.saveAll(Arrays.asList(senderAcc, receiverAcc));
         //Explicitly order JPA to commit the changes to the database
         accountRepository.flush();
